@@ -11,7 +11,7 @@ const FACTCHECK_API_KEY = process.env.GOOGLE_FACTCHECK_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname)));
 
 // ======================================
 // 1. GOOGLE FACT CHECK API
