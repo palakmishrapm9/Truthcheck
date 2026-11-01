@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TruthCheck - Fake News Detector</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">Truth<span>Check.</span></div>
+
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#detector">Detect News</a>
+            <a href="#tips">Media Literacy</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+            <p class="tag">FAKE NEWS DETECTION PROGRAMME</p>
+
+            <h1>Don't Believe Everything.<br>
+                <span>Check Before You Share.</span>
+            </h1>
+
+            <p>
+                Verify news, identify misleading information
+                and become a responsible digital citizen.
+            </p>
+
+            <a href="#detector" class="main-btn">
+                Check News Now →
+            </a>
+        </div>
+
+    </section>
+
+    <section class="detector" id="detector">
+
+        <div class="section-heading">
+            <p>NEWS VERIFICATION TOOL</p>
+            <h2>Check Your News</h2>
+
+            <span>
+                Enter a news headline or claim to find existing
+                fact-check reviews.
+            </span>
+        </div>
+
+        <div class="check-box">
+
+            <label for="newsInput">Enter News or Headline</label>
+
+            <textarea
+                id="newsInput"
+                placeholder="Paste your news headline here..."
+            ></textarea>
+
+            <button id="checkBtn" onclick="checkNews()">
+                Check News
+            </button>
+
+            <p id="loading" class="loading"></p>
+
+            <div id="result" class="result hidden">
+
+                <h2 id="resultTitle"></h2>
+
+                <p id="resultMessage"></p>
+
+                <div id="reviewList"></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="tips" id="tips">
+
+        <div class="section-heading">
+            <p>MEDIA LITERACY</p>
+            <h2>Think Before You Share</h2>
+            <span>
+                Follow these simple steps to identify fake news.
+            </span>
+        </div>
+
+        <div class="tips-container">
+
+            <div class="tip-card">
+                <div class="tip-icon">🔍</div>
+                <h3>Check the Source</h3>
+                <p>Always check the website and publisher of the news.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-icon">📅</div>
+                <h3>Check the Date</h3>
+                <p>Old news can be shared again as new information.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-icon">📰</div>
+                <h3>Read Full News</h3>
+                <p>Do not trust only headlines. Read the complete article.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-icon">🔗</div>
+                <h3>Cross Verify</h3>
+                <p>Compare information with other trusted sources.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="about" id="about">
+
+        <h2>About TruthCheck</h2>
+
+        <p>
+            TruthCheck is a Fake News Detection and Media
+            Literacy Programme designed to create awareness
+            about misinformation and promote responsible
+            use of digital media.
+        </p>
+
+    </section>
+
+    <footer>
+        <p>© 2026 TruthCheck | Fake News Detection and Media Literacy Programme</p>
+        <p>Think Smart. Verify First. Share Responsibly.</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

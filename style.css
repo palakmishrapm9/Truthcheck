@@ -1,0 +1,378 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    scroll-behavior: smooth;
+}
+
+body {
+    background: #f5f7fc;
+    color: #202b43;
+}
+
+/* Navigation */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 8%;
+    background: white;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 27px;
+    font-weight: bold;
+    color: #172b50;
+}
+
+.logo span {
+    color: #3977e8;
+}
+
+.navbar nav {
+    display: flex;
+    gap: 30px;
+}
+
+.navbar nav a {
+    text-decoration: none;
+    color: #27344d;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.navbar nav a:hover {
+    color: #3977e8;
+}
+
+/* Hero Section */
+
+.hero {
+    min-height: 510px;
+    display: flex;
+    align-items: center;
+    padding: 70px 10%;
+    background: linear-gradient(120deg, #142747, #2458a2);
+    color: white;
+}
+
+.hero-content {
+    max-width: 700px;
+}
+
+.tag {
+    color: #a9c9ff;
+    letter-spacing: 3px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    line-height: 1.25;
+    margin-bottom: 22px;
+}
+
+.hero h1 span {
+    color: #82b4ff;
+}
+
+.hero-content > p:not(.tag) {
+    color: #d9e5fa;
+    font-size: 17px;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.main-btn {
+    display: inline-block;
+    padding: 14px 27px;
+    background: #ffffff;
+    color: #2458a2;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.main-btn:hover {
+    background: #dbeaff;
+    transform: translateY(-3px);
+}
+
+/* Section Heading */
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.section-heading > p {
+    color: #3977e8;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.section-heading h2 {
+    font-size: 34px;
+    color: #172b50;
+    margin-bottom: 12px;
+}
+
+.section-heading span {
+    color: #69758a;
+    font-size: 15px;
+}
+
+/* News Detector */
+
+.detector {
+    padding: 85px 10%;
+}
+
+.check-box {
+    max-width: 750px;
+    margin: auto;
+    background: white;
+    padding: 35px;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(30,50,90,0.08);
+}
+
+.check-box label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+textarea {
+    width: 100%;
+    height: 140px;
+    padding: 16px;
+    border: 1px solid #d8dfec;
+    border-radius: 8px;
+    resize: vertical;
+    outline: none;
+    font-size: 15px;
+}
+
+textarea:focus {
+    border-color: #3977e8;
+    box-shadow: 0 0 0 3px rgba(57,119,232,0.1);
+}
+
+#checkBtn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 15px;
+    background: #3977e8;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#checkBtn:hover {
+    background: #2458a2;
+}
+
+#checkBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    margin-top: 18px;
+    color: #3977e8;
+}
+
+/* Results */
+
+.result {
+    margin-top: 25px;
+    padding: 22px;
+    border-radius: 10px;
+    background: #f3f6fc;
+}
+
+.hidden {
+    display: none;
+}
+
+.result h2 {
+    margin-bottom: 12px;
+}
+
+.result p {
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.result.false {
+    border-left: 5px solid #dc3545;
+}
+
+.result.true {
+    border-left: 5px solid #198754;
+}
+
+.result.mixed {
+    border-left: 5px solid #e6a000;
+}
+
+.result.unverified,
+.result.reviewed {
+    border-left: 5px solid #3977e8;
+}
+
+.review-card {
+    margin-top: 18px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e7f0;
+}
+
+.review-card h4 {
+    color: #263e66;
+    margin-bottom: 8px;
+}
+
+.review-card a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #3977e8;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* Media Literacy Tips */
+
+.tips {
+    background: #eaf0fa;
+    padding: 80px 8%;
+}
+
+.tips-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.tip-card {
+    background: white;
+    padding: 28px 20px;
+    border-radius: 12px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.tip-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.tip-icon {
+    font-size: 35px;
+    margin-bottom: 15px;
+}
+
+.tip-card h3 {
+    color: #172b50;
+    margin-bottom: 12px;
+}
+
+.tip-card p {
+    color: #68758a;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* About */
+
+.about {
+    padding: 75px 15%;
+    text-align: center;
+    background: white;
+}
+
+.about h2 {
+    font-size: 32px;
+    color: #172b50;
+    margin-bottom: 20px;
+}
+
+.about p {
+    color: #68758a;
+    line-height: 1.9;
+    font-size: 16px;
+}
+
+/* Footer */
+
+footer {
+    padding: 25px;
+    background: #142747;
+    color: white;
+    text-align: center;
+    line-height: 2;
+    font-size: 13px;
+}
+
+/* Mobile Responsive */
+
+@media (max-width: 768px) {
+
+    .navbar {
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .navbar nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .hero {
+        padding: 65px 7%;
+    }
+
+    .hero h1 {
+        font-size: 34px;
+    }
+
+    .detector {
+        padding: 60px 6%;
+    }
+
+    .check-box {
+        padding: 22px;
+    }
+
+    .tips-container {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading h2 {
+        font-size: 28px;
+    }
+
+    .about {
+        padding: 55px 8%;
+    }
+}
