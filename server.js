@@ -120,6 +120,8 @@ RULES:
 8. If evidence is insufficient, use unverified.
 9. No fact-check result does not mean the news is false.
 10. Explain in simple English.
+11. Use your existing knowledge to assess well-established historical and scientific facts, even when no fact-check review is available.
+12. Do not automatically classify a claim as unverified just because the fact-check database returned no results.
 
 Return ONLY valid JSON in this format:
 
