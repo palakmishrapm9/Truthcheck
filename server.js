@@ -8,11 +8,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const FACTCHECK_API_KEY = process.env.GOOGLE_FACTCHECK_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 app.use(express.json());
-
-// Serve website files from the main project folder
 app.use(express.static(__dirname));
 
 // ======================================
@@ -20,10 +18,7 @@ app.use(express.static(__dirname));
 // ======================================
 
 async function getFactCheckReviews(news) {
-    if (!FACTCHECK_API_KEY) {
-        console.log("Fact Check API key missing.");
-        return [];
-    }
+    if (!FACTCHECK_API_KEY) return [];
 
     try {
         const apiURL = new URL(
@@ -61,11 +56,10 @@ async function getFactCheckReviews(news) {
 }
 
 // ======================================
-// 2. CHECK REVIEW RELEVANCE
+// 2. FILTER RELEVANT REVIEWS
 // ======================================
 
 function filterRelevantReviews(news, reviews) {
-
     const normalize = text =>
         text.toLowerCase()
             .replace(/[^a-z0-9\s]/g, " ")
@@ -75,7 +69,6 @@ function filterRelevantReviews(news, reviews) {
     const newsWords = new Set(normalize(news));
 
     return reviews.filter(review => {
-
         const reviewText = [
             review.claim,
             review.title
@@ -83,9 +76,7 @@ function filterRelevantReviews(news, reviews) {
 
         const reviewWords = normalize(reviewText);
 
-        if (reviewWords.length === 0) {
-            return false;
-        }
+        if (reviewWords.length === 0) return false;
 
         const commonWords = reviewWords.filter(word =>
             newsWords.has(word)
@@ -99,55 +90,43 @@ function filterRelevantReviews(news, reviews) {
 }
 
 // ======================================
-// 3. GEMINI AI ANALYSIS
+// 3. GROQ AI ANALYSIS
 // ======================================
 
-async function checkWithGemini(news, reviews) {
-
-    if (!GEMINI_API_KEY) {
-        throw new Error("Gemini API key is missing.");
+async function checkWithGroq(news, reviews) {
+    if (!GROQ_API_KEY) {
+        throw new Error("Groq API key is missing. Check Render Environment.");
     }
 
-    const { GoogleGenAI } = await import("@google/genai");
-
-    const ai = new GoogleGenAI({
-        apiKey: GEMINI_API_KEY
-    });
-
     const prompt = `
-You are an educational news analysis assistant.
+You are an educational news verification assistant.
 
-Analyze the following news claim carefully.
+Analyze this news claim carefully:
 
 NEWS CLAIM:
 "${news}"
 
-RELEVANT PUBLISHED FACT-CHECK REVIEWS:
+PUBLISHED FACT-CHECK REVIEWS:
 ${JSON.stringify(reviews)}
 
-IMPORTANT RULES:
+RULES:
+1. Analyze the exact claim.
+2. Use relevant published fact-check reviews as evidence.
+3. Do not invent facts, sources or events.
+4. Do not claim to have performed a live internet search.
+5. If reliable evidence supports the claim, use likely_true.
+6. If reliable evidence contradicts the claim, use likely_false.
+7. If only some parts are correct, use mixed.
+8. If evidence is insufficient, use unverified.
+9. No fact-check result does not mean the news is false.
+10. Explain in simple English.
 
-1. Understand exactly what the news claim says.
-2. Do not treat unrelated fact-check reviews as evidence.
-3. Use published reviews only when they address the same claim.
-4. Do not invent sources, dates, events or evidence.
-5. Do not pretend you performed a live internet search.
-6. If the claim is well established, you may classify it as likely_true.
-7. If reliable information contradicts the claim, classify it as likely_false.
-8. If only part of the claim is supported, choose mixed.
-9. If you cannot confidently assess the claim, choose unverified.
-10. Absence of a fact-check review does not mean the claim is false.
-11. Explain the result in simple English.
-
-Return ONLY one valid JSON object.
-Do not use Markdown or code fences.
-
-Required format:
+Return ONLY valid JSON in this format:
 
 {
   "status": "unverified",
   "explanation": "Explain your assessment.",
-  "evidence": "Explain what information supports the assessment."
+  "evidence": "Explain the available evidence."
 }
 
 Allowed status values:
@@ -157,36 +136,61 @@ mixed
 unverified
 `;
 
-    // Use Gemini Generate Content API
-    const response = await ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents: prompt
-    });
+    const response = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.2,
+                max_tokens: 700
+            })
+        }
+    );
 
-    const answer = response.text;
+    const data = await response.json();
 
-    if (!answer) {
-        throw new Error("Gemini returned an empty response.");
+    if (!response.ok) {
+        console.error("Groq API Error:", data);
+        const error = new Error(
+            data.error?.message || "Groq API request failed."
+        );
+        error.status = response.status;
+        throw error;
     }
 
-    console.log("Gemini response:", answer);
+    const answer =
+        data.choices?.[0]?.message?.content;
 
-    // Extract JSON from response
+    if (!answer) {
+        throw new Error("Groq returned an empty response.");
+    }
+
+    console.log("Groq response:", answer);
+
     const start = answer.indexOf("{");
     const end = answer.lastIndexOf("}");
 
     if (start === -1 || end === -1) {
-        throw new Error("Gemini returned an invalid response.");
+        throw new Error("AI returned an invalid response.");
     }
 
     let result;
 
     try {
-        result = JSON.parse(
-            answer.substring(start, end + 1)
-        );
-    } catch (error) {
-        throw new Error("Gemini returned invalid JSON.");
+        result = JSON.parse(answer.substring(start, end + 1));
+    } catch {
+        throw new Error("AI returned invalid JSON.");
     }
 
     const allowedStatuses = [
@@ -202,10 +206,10 @@ unverified
 
     return {
         status: result.status,
-        explanation:
-            result.explanation || "No explanation available.",
-        evidence:
-            result.evidence || "No supporting evidence available."
+        explanation: result.explanation ||
+            "No explanation available.",
+        evidence: result.evidence ||
+            "No supporting evidence available."
     };
 }
 
@@ -214,9 +218,7 @@ unverified
 // ======================================
 
 app.post("/api/check-news", async (req, res) => {
-
     try {
-
         const news = req.body?.news;
 
         if (
@@ -228,9 +230,9 @@ app.post("/api/check-news", async (req, res) => {
             });
         }
 
-        if (!GEMINI_API_KEY) {
+        if (!GROQ_API_KEY) {
             return res.status(500).json({
-                error: "Gemini API key is missing. Check Render Environment."
+                error: "Groq API key is missing. Check Render Environment."
             });
         }
 
@@ -238,11 +240,9 @@ app.post("/api/check-news", async (req, res) => {
 
         console.log("Checking news:", cleanNews);
 
-        // Get published reviews
         const allReviews =
             await getFactCheckReviews(cleanNews);
 
-        // Keep only relevant reviews
         const relevantReviews =
             filterRelevantReviews(cleanNews, allReviews);
 
@@ -251,50 +251,36 @@ app.post("/api/check-news", async (req, res) => {
             relevantReviews.length
         );
 
-        // Gemini analysis
-        const result = await checkWithGemini(
+        const result = await checkWithGroq(
             cleanNews,
             relevantReviews
         );
 
         return res.json({
-
             status: result.status,
-
             message: "News assessment completed.",
-
             explanation: result.explanation,
-
             evidence: result.evidence,
-
             reviews: relevantReviews,
-
             disclaimer:
-                "This is an AI-assisted assessment based on available information and existing knowledge. It is not a guaranteed fact-check. Please verify important claims using original sources."
-
+                "This is an AI-assisted assessment, not a guaranteed fact-check. Verify important claims using reliable original sources."
         });
 
     } catch (error) {
-
         console.error("Server Error:", error);
-
-        const message = error.message || "";
 
         if (
             error.status === 429 ||
-            error.code === "too_many_requests" ||
-            message.toLowerCase().includes("quota") ||
-            message.toLowerCase().includes("rate limit")
+            error.message.toLowerCase().includes("rate limit")
         ) {
             return res.status(429).json({
-                error:
-                    "Gemini API quota exceeded. Please try again later."
+                error: "Groq API limit reached. Please try again later."
             });
         }
 
         return res.status(500).json({
-            error:
-                message || "Something went wrong. Please try again."
+            error: error.message ||
+                "Something went wrong. Please try again."
         });
     }
 });
@@ -304,10 +290,9 @@ app.post("/api/check-news", async (req, res) => {
 // ======================================
 
 app.listen(PORT, () => {
-
     console.log(
-        "Gemini API:",
-        GEMINI_API_KEY ? "LOADED" : "MISSING"
+        "Groq API:",
+        GROQ_API_KEY ? "LOADED" : "MISSING"
     );
 
     console.log(
@@ -315,8 +300,5 @@ app.listen(PORT, () => {
         FACTCHECK_API_KEY ? "LOADED" : "MISSING"
     );
 
-    console.log(
-        `TruthCheck running at http://localhost:${PORT}`
-    );
-
+    console.log(`TruthCheck running on port ${PORT}`);
 });
