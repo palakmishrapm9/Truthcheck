@@ -11,7 +11,9 @@ const FACTCHECK_API_KEY = process.env.GOOGLE_FACTCHECK_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+
+// Serve website files from the main project folder
+app.use(express.static(__dirname));
 
 // ======================================
 // 1. GOOGLE FACT CHECK API
@@ -102,6 +104,10 @@ function filterRelevantReviews(news, reviews) {
 
 async function checkWithGemini(news, reviews) {
 
+    if (!GEMINI_API_KEY) {
+        throw new Error("Gemini API key is missing.");
+    }
+
     const { GoogleGenAI } = await import("@google/genai");
 
     const ai = new GoogleGenAI({
@@ -124,16 +130,14 @@ IMPORTANT RULES:
 1. Understand exactly what the news claim says.
 2. Do not treat unrelated fact-check reviews as evidence.
 3. Use published reviews only when they address the same claim.
-4. A review about a different event involving the same place or person is NOT relevant.
-5. Use your existing knowledge to assess well-established facts.
-6. Do not invent sources, dates, events or evidence.
-7. Do not pretend that you performed a live internet search.
-8. If the claim is a well-established fact, you may classify it as likely_true.
-9. If reliable information contradicts a well-established claim, you may classify it as likely_false.
-10. If only part of the claim is supported, choose mixed.
-11. If you cannot confidently assess the claim, choose unverified.
-12. Absence of a fact-check review does not mean the claim is false.
-13. Explain the result in simple English.
+4. Do not invent sources, dates, events or evidence.
+5. Do not pretend you performed a live internet search.
+6. If the claim is well established, you may classify it as likely_true.
+7. If reliable information contradicts the claim, classify it as likely_false.
+8. If only part of the claim is supported, choose mixed.
+9. If you cannot confidently assess the claim, choose unverified.
+10. Absence of a fact-check review does not mean the claim is false.
+11. Explain the result in simple English.
 
 Return ONLY one valid JSON object.
 Do not use Markdown or code fences.
@@ -153,12 +157,13 @@ mixed
 unverified
 `;
 
-    const interaction = await ai.interactions.create({
+    // Use Gemini Generate Content API
+    const response = await ai.models.generateContent({
         model: "gemini-3.8-flash",
-        input: prompt
+        contents: prompt
     });
 
-    const answer = interaction.output_text;
+    const answer = response.text;
 
     if (!answer) {
         throw new Error("Gemini returned an empty response.");
@@ -166,7 +171,7 @@ unverified
 
     console.log("Gemini response:", answer);
 
-    // Extract JSON
+    // Extract JSON from response
     const start = answer.indexOf("{");
     const end = answer.lastIndexOf("}");
 
@@ -225,7 +230,7 @@ app.post("/api/check-news", async (req, res) => {
 
         if (!GEMINI_API_KEY) {
             return res.status(500).json({
-                error: "Gemini API key is missing. Check your .env file."
+                error: "Gemini API key is missing. Check Render Environment."
             });
         }
 
@@ -283,7 +288,7 @@ app.post("/api/check-news", async (req, res) => {
         ) {
             return res.status(429).json({
                 error:
-                    "Gemini API quota exceeded. Please check your free-tier limits or try again later."
+                    "Gemini API quota exceeded. Please try again later."
             });
         }
 
